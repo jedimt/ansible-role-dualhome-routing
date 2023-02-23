@@ -1,0 +1,47 @@
+---
+# tasks file ansible-role-dualhome-routing
+- name: Create routing table entries
+  blockinfile:
+    path: /etc/iproute2/rt_tables
+    block: |
+      {{mgt_route_table}}    t1
+      {{data_route_table}}   t2
+    insertafter: EOF
+  tags: rt_tables
+
+- name: Enable arp filter
+  shell: |
+    sysctl net.ipv4.conf.default.arp_filter=1
+- name: Create network config service for network routing setup
+  blockinfile:
+    path: /etc/systemd/system/labroute.service
+    block: |
+      [Unit]
+      Description=routing setup for demopod servers
+
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/labroute.sh
+
+      [Install]
+      WantedBy=multi-user.target
+    create: yes
+
+- name: Create labroute.sh file
+  template:
+    src: labroute.j2
+    dest: /opt/labroute.sh
+  tags: template
+
+- name: Make labroute.sh file executable
+  file:
+    dest: /opt/labroute.sh
+    mode: a+x
+  tags: template
+
+- name: Enable labroute.service
+  systemd:
+    name: labroute.service
+    state: started
+    enabled: yes
+  tags: template

@@ -1,0 +1,15 @@
+#!/bin/bash
+# Add new routing table
+echo 100 t1 >> /etc/iproute2/rt_tables
+echo 101 t2 >> /etc/iproute2/rt_tables
+
+#Add routes to tables
+ip route add {{route}} dev {{mgt_int}} src {{mgt_ip}} table t1
+ip route add table t1 default via {{gateway4}} dev {{mgt_int}}
+
+ip route add {{route}} dev {{data_int}} src {{data_ip}} table t2
+ip route add table t2 default via {{gateway4}} dev {{data_int}}
+
+# Add rules to routing tables
+ip rule add table t1 from {{mgt_ip}}
+ip rule add table t2 from {{data_ip}}

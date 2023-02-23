@@ -1,0 +1,7 @@
+---
+# defaults file ansible-role-dualhome-routing
+
+route: 10.100.24.0/22
+mgt_route_table: 100
+data_route_table: 101
+gateway4: 10.100.24.1
